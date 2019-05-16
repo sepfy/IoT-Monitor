@@ -4,8 +4,8 @@ from flask_socketio import SocketIO, emit
 
 import threading
 import time
-
-
+import datetime
+import random
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -25,7 +25,7 @@ sids = []
 def emit_iot():
   while True:
     for sid in sids:
-      socketio.emit("update", {"data": [1, 2, 3], "sid": sid}, namespace='/message', room=sid)
+      socketio.emit("update", {"data": [str(datetime.datetime.now()), 20+random.random()], "sid": sid}, namespace='/message', room=sid)
     time.sleep(3)
   
 
