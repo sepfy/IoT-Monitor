@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Bootstrap Example</title>
+  <title>IOTGO</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script type="text/javascript" src="//cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="/static/chart.js"></script>
 
   <style>
   </style>
@@ -17,7 +16,7 @@
 </head>
 <body>
 
-<div class="pure-menu" style="background: rgb(66, 184, 221); display: inline-block;">
+<div class="pure-menu pure-menu-horizontal" style="background: rgb(66, 184, 221);">
   <ul class="pure-menu-list">
     <li class="pure-menu-item">
       <a href="#" class="pure-menu-link"> <i class="material-icons">devices</i> </a>
@@ -33,121 +32,26 @@
 
 
 <div class="pure-g">
-    <div id="viz1" class="pure-u-1-3"></div>
-    <div id="viz2" class="pure-u-1-3"></div>
-    <div id="viz3" class="pure-u-1-3"></div>
+    <div id="viz1" class="pure-u-1-2"></div>
+    <div id="viz2" class="pure-u-1-2"></div>
 </div>
-
-    <input name="updateButton" 
-           type="button" 
-           value="Update" 
-           onclick="updateData()" />
-<p></p>
 
 
 <script>
-
-
-function LineChart() {
-  this.width = 600;
-  this.height = 600;
-}
-
-LineChart.prototype.init = function() {
-  this.dataset = [];
-  var id = "#viz2";
-  var padding = { top: 50, right: 50, bottom: 50, left: 50 };
-  this.margin = 100;
-
-  this.svg = d3.select(id)
-            .append('svg')
-            .attr('width', this.width + 2*this.margin)
-            .attr('height', this.height + 2*this.margin);
-
-  this.svg.append("g")
-    .attr("class", "x axis")
-    .attr("transform", "translate(" + this.margin + "," + this.height + ")")
-  this.svg.append("g")
-    .attr("class", "y axis")
-    .attr("transform", "translate(" + this.margin + ", 0)")
-
-  this.svg.append('g')
-  .append('path')
-  .attr('class', 'line')
-  .attr("transform", "translate(" + this.margin + ", 0)")
-  .attr('fill', 'none')
-  .attr('stroke-width', 3)
-  .attr('stroke', '#CD5C5C').transition().duration(5000).delay(2000);
-
-  this.svg.append("g")
-    .attr("class", "dot");
-//  this.draw();
-}
-
-var i = 0
-LineChart.prototype.update = function(new_data) {
-  this.dataset = this.dataset.concat([[Date.parse(new_data[0]), new_data[1]]]);
-  console.log(this.dataset);
-  this.draw();
-}
-
-LineChart.prototype.draw = function() {
-
-  var min = d3.min(this.dataset, function(d) { return d[1];})
-  var max = d3.max(this.dataset, function(d) { return d[1];})
-  var xScale = d3.scaleTime()
-   .domain([this.dataset[0][0], this.dataset[this.dataset.length-1][0]])
-   .range([0, this.width]);
-  var yScale = d3.scaleLinear().domain([min, max]).range([this.height, 0]);
-  var xAxis = d3.axisBottom();
-  var yAxis = d3.axisLeft();
-  var linePath = d3.line()
-                .x(function(d){ return xScale(d[0]) })
-                .y(function(d){ return yScale(d[1]) })
-                .curve(d3.curveMonotoneX);
-  this.svg.select(".x.axis")
-    .call(d3.axisBottom(xScale)); 
-  this.svg.select(".y.axis")
-    .call(d3.axisLeft(yScale)); 
-  this.svg.select(".line").attr("d", linePath(this.dataset));
-
-  var m = this.margin;
-  d3.selectAll(".circle").remove();
-  var dot = this.svg.selectAll(".dot");
-    dot.data(this.dataset)
-    .enter()
-    .append("circle") // Uses the enter().append() method
-    .attr("class", "circle")
-    .attr("cx", function(d) { return xScale(d[0])+ m })
-    .attr("cy", function(d) { return yScale(d[1]) })
-    .attr("r", 5);  
-
-
-}
-
-
 var viz1 = new LineChart();
 viz1.init();
 
-function updateData() {
-  viz1.update();
-}
+var url = 'http://' + document.domain + ':' + location.port + '/message';
+console.log(url);
+var socket = io.connect(url);
 
-    var url = 'http://' + document.domain + ':' + location.port + '/message';
-    console.log(url);
-    var socket = io.connect(url);
+socket.on('status', function(msg) {
+  console.log(msg.data);
+});
 
-    socket.on('status', function(msg) {
-        console.log(msg.data);
-    });
-
-    socket.on('update', function(msg) {
-//        console.log(msg.data);
-//        console.log(msg.sid); 
-        viz1.update(msg.data);
-    });
-
-
+socket.on('update', function(msg) {
+  viz1.update(msg.data);
+});
 </script>
 
 
