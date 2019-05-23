@@ -21,6 +21,10 @@ socketio = SocketIO(app, **params)
 def index():
     return render_template('index.html')
 
+@app.route('/device')
+def device():
+    return render_template('device.html')
+
 sids = []
 def emit_iot():
   while True:
