@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'head.html' %}
+<body>
+{% include 'nav.html' %}
+
+<div class="container">
+
+
+      <table class="highlight responsive-table">
+        <thead>
+          <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Last Connection</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td> <a href="/device?id=c6ab39">c6ab39</a></td>
+            <td>Thermometer</td>
+            <td>2019-03-02 14:32:33</td>
+          </tr>
+        </tbody>
+      </table>
+
+</div>
+
+
+
+<script>
+var viz1 = new LineChart();
+viz1.init();
+
+var url = 'http://' + document.domain + ':' + location.port + '/message';
+console.log(url);
+var socket = io.connect(url);
+
+socket.on('status', function(msg) {
+  console.log(msg.data);
+});
+
+socket.on('update', function(msg) {
+  viz1.update(msg.data);
+});
+
+
+var elem = document.querySelector('.collapsible.popout');
+var instance = M.Collapsible.init(elem, {
+  accordion: false
+});
+        
+</script>
+
+
+
+
+</body>
+</html>
+

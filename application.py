@@ -23,7 +23,16 @@ def index():
 
 @app.route('/device')
 def device():
-    return render_template('device.html')
+    if request.args.get("id"):
+      devid = request.args.get("id")
+      print(devid)
+      return render_template('device.html')
+
+    return render_template('device_list.html')
+
+@app.route('/setting')
+def setting():
+    return render_template('setting.html')
 
 sids = []
 def emit_iot():

@@ -1,44 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <title>IOT-GO</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <script type="text/javascript" src="//cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"></script>
-  <script src="https://d3js.org/d3.v5.min.js"></script>
-  <script src="/static/chart.js"></script>
-</head>
+{% include 'head.html' %}
 <body>
+{% include 'nav.html' %}
 
-<nav>
-  <div class="nav-wrapper teal accent-4">
-    <ul id="nav-mobile" class="hide-on-med-and-down">
-      <li><a href="/"><i class="material-icons">devices</i></a></li>
-      <li><a href="/device"><i class="material-icons">settings_remote</i></a></li>
-      <li><a href="collapsible.html"><i class="material-icons">settings</i></a></li>
-    </ul>
+<div class="container">
+<div class="row">
+  <div class="col l6 m12 s12">
+    <div class="card" id="viz1">
+    </div>
+    <div class="card" id="viz2">
+    </div>
   </div>
-</nav>
-<div>
-
-      <ul class="collection with-header">
-        <li class="collection-header"><h4>First Names</h4></li>
-        <li class="collection-item"><div>Alvin<a href="#!" class="secondary-content"><i class="material-icons">send</i></a></div></li>
-        <li class="collection-item"><div>Alvin<a href="#!" class="secondary-content"><i class="material-icons">send</i></a></div></li>
-        <li class="collection-item"><div>Alvin<a href="#!" class="secondary-content"><i class="material-icons">send</i></a></div></li>
-        <li class="collection-item"><div>Alvin<a href="#!" class="secondary-content"><i class="material-icons">send</i></a></div></li>
-      </ul>
-
+  <div class="col l6 m12 s12">
+  <div class="card">
+  <div class="card-content">
+  <span class="card-title">Device Setting</span>
+   <form>
+      <div class="row">
+        <div class="input-field col s12">
+          <input disabled value="30" id="disabled" type="text" class="validate">
+          <label for="disabled"> Upper Limit </label>
+        </div>
+      </div>
+    </form>
+  </div>
+  </div>
+  </div>
 </div>
-
-
-
+</div>
 <script>
-var viz1 = new LineChart();
+var viz1 = new LineChart("#viz1");
 viz1.init();
+var viz2 = new LineChart("#viz2");
+viz2.init();
 
 var url = 'http://' + document.domain + ':' + location.port + '/message';
 console.log(url);
@@ -50,6 +45,7 @@ socket.on('status', function(msg) {
 
 socket.on('update', function(msg) {
   viz1.update(msg.data);
+  viz2.update(msg.data);
 });
 
 

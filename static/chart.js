@@ -1,14 +1,14 @@
-function LineChart() {
-  this.width = 500;
-  this.height = 300;
+function LineChart(id) {
+  this.width = 400;
+  this.height = 200;
+  this.id = id;
 }
 
 LineChart.prototype.init = function() {
   this.dataset = [];
-  var id = "#viz1";
   this.margin = 50;
-
-  this.svg = d3.select(id)
+  console.log(this.id);
+  this.svg = d3.select(this.id)
     .append('svg')
     .attr('width', this.width + 2*this.margin )
     .attr('height', this.height + 2*this.margin)

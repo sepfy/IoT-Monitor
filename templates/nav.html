@@ -1,0 +1,23 @@
+<nav>
+<div class="nav-wrapper teal accent-4">
+    <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+  <ul id="nav-mobile" class="hide-on-med-and-down">
+    <li><a href="/"><i class="material-icons left">devices</i>Dashboard</a></li>
+    <li><a href="/device"><i class="material-icons left">settings_remote</i>Devices</a></li>
+    <li><a href="/setting"><i class="material-icons left">settings</i>Setting</a></li>
+  </ul>
+</div>
+</nav>
+
+<ul class="sidenav" id="mobile-demo">
+  <li><a href="/"><i class="material-icons">devices</i> Dashboard </a></li>
+  <li><a href="/device"><i class="material-icons">settings_remote</i> Devices </a></li>
+  <li><a href="/setting"><i class="material-icons">settings</i> Setting </a></li>
+</ul>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.sidenav');
+    var instances = M.Sidenav.init(elems, {});
+  });
+</script>
