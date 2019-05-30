@@ -4,10 +4,10 @@ function LineChart(id) {
   this.id = id;
 }
 
-LineChart.prototype.init = function() {
-  this.dataset = [];
+LineChart.prototype.init = function(dataset) {
+ 
+  this.dataset = dataset;
   this.margin = 50;
-  console.log(this.id);
   this.svg = d3.select(this.id)
     .append('svg')
     .attr('width', this.width + 2*this.margin )
@@ -32,14 +32,21 @@ LineChart.prototype.init = function() {
 
   this.svg.append("g")
     .attr("class", "dot");
-}
-
-LineChart.prototype.update = function(new_data) {
-  this.dataset = this.dataset.concat([[Date.parse(new_data[0]), new_data[1]]]);
-  //console.log(this.dataset);
   this.draw();
 }
 
+LineChart.prototype.update = function(new_data) {
+  this.dataset = this.dataset.concat([[new_data[0], new_data[1]]]);
+  console.log(this.dataset);
+  this.draw();
+}
+/*
+LineChart.prototype.update = function(new_data) {
+  this.dataset = this.dataset.concat([[new_data[0], new_data[1]]]);
+  console.log(this.dataset);
+  this.draw();
+}
+*/
 LineChart.prototype.draw = function() {
 
   if(this.dataset.length > 20)

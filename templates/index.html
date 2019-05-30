@@ -14,7 +14,7 @@
       <div class="card">
         <div class="card-content">
           <h6> Temperature </h6>
-          <span class="card-title activator center"> <h3 class="red-text text-lighten-3">23.6<small> ℃ </small></h3> </span>
+          <span class="card-title activator center"> <h3 id="temp" class="red-text text-lighten-3">23.6<small> ℃ </small></h3> </span>
         </div>
       </div>
     </div>
@@ -23,7 +23,7 @@
       <div class="card">
         <div class="card-content">
           <h6> Humidity </h6>
-          <span class="card-title activator center"> <h3 class="blue-text text-lighten-3"> 70 <small> % </small> </h3> </span>
+          <span class="card-title activator center"> <h3 id="humi" class="blue-text text-lighten-3"> 70 <small> % </small> </h3> </span>
         </div>
       </div>
     </div>
@@ -37,8 +37,6 @@
 
 
 <script>
-var viz1 = new LineChart();
-viz1.init();
 
 var url = 'http://' + document.domain + ':' + location.port + '/message';
 console.log(url);
@@ -49,15 +47,12 @@ socket.on('status', function(msg) {
 });
 
 socket.on('update', function(msg) {
-  viz1.update(msg.data);
+  console.log(msg.data);
+  var obj = JSON.parse(msg.data);
+  document.getElementById("humi").innerHTML = obj["h"] + "<small> % </small>";
+  document.getElementById("temp").innerHTML = obj["t"] + "<small> ℃ </small>";
 });
 
-
-var elem = document.querySelector('.collapsible.popout');
-var instance = M.Collapsible.init(elem, {
-  accordion: false
-});
-        
 </script>
 
 
