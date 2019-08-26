@@ -3,32 +3,25 @@ from flask import Flask, render_template, session, request, redirect, url_for
 from flask_login import LoginManager
 from flask_socketio import SocketIO, emit
 import json
-import plyvel
+from forms import LoginForm
+from bluepy.btle import Scanner, DefaultDelegate
+
+class ScanDelegate(DefaultDelegate):
+  def __init__(self):
+    DefaultDelegate.__init__(self)
+
+  def handleDiscovery(self, dev, isNewDev, isNewData):
+    if isNewDev:
+      socketio.emit("update", dev.addr, namespace='/message', room=sid)
+
+
 #from model import Model
 '''
 model = Model()
 '''
 
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user  
 
-class LoginForm(FlaskForm):
-  username = StringField('Username')#, validators=[DataRequired()])
-  password = PasswordField('Password')#, validators=[DataRequired()])
-  #submit = SubmitField('submit')
-
-  db = plyvel.DB('account/', create_if_missing=True)
-  db.put(b"admin", b"123456") 
-
-  def validate(self):
-    print(self.username)
-    password = str(self.db.get(b"admin"), encoding = "utf-8")
-    print(password)
-    print(self.password)
-    if self.password.data == password:
-      return True
 
 import threading
 
@@ -64,9 +57,9 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+
   form = LoginForm()
   if form.validate_on_submit():
-
     user = User()
     user.id = form.username.data
     login_user(user)
@@ -109,13 +102,15 @@ def setting():
 
 sids = []
 def emit_iot():
-  while True:
-    #msg = model.get_last()
-    #print(msg)
-    msg = {"temp": 20+round(random.random(),2), "humi": 67}
-    for sid in sids:
-      socketio.emit("update", {"data": json.dumps(msg), "sid": sid}, namespace='/message', room=sid)
-    time.sleep(3)
+  scanner = Scanner().withDelegate(ScanDelegate())
+  devices = scanner.scan(10.0)
+  #while True:
+  #  #msg = model.get_last()
+  #  #print(msg)
+  #  msg = {"temp": 20+round(random.random(),2), "humi": 67}
+  #  #for sid in sids:
+  #  #  socketio.emit("update", {"data": json.dumps(msg), "sid": sid}, namespace='/message', room=sid)
+  #  #time.sleep(3)
   
 
 @socketio.on('connect', namespace='/message')
