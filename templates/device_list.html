@@ -15,7 +15,7 @@
     </thead>
     <tbody>
       <tr>
-        <td> <a href="/device?id=r4vwwbav">r4vwwbav</a></td>
+        <td> <a href="/device?id=Central">Central</a></td>
         <td>Thermometer</td>
         <td>2019-03-02 14:32:33</td>
       </tr>
@@ -28,11 +28,23 @@
 <div id="modal1" class="modal">
   <form action="/device" method="post">
     <div class="modal-content">
-      <h4> Secret Key </h4>
-      <div class="input-field">
-        <input id="key" name="key" type="text" class="validate">
-        <label for="key"> key </label>
-      </div>
+
+      <table id="scan">
+<h4>
+        <thead>
+          <tr>
+              <th>Selection</th>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Signal</th>
+          </tr>
+
+        </thead>
+        <tbody>
+        </tbody>
+</h4>
+      </table>
+
     </div>
     <div class="modal-footer">
 <a class="modal-close waves-effect waves-green btn-flat">CANCEL</a>
@@ -43,10 +55,43 @@
 
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('.modal');
-    var instances = M.Modal.init(elems, {});
+
+var socket;
+
+function scan() {
+  var url = 'http://' + document.domain + ':' + location.port + '/scan';
+  socket = io.connect(url);
+  socket.on('scan', function(msg) {
+    console.log(msg);
+    let obj = JSON.parse(msg);
+    let table = document.getElementById("scan");
+    let row = table.insertRow(-1);
+    let check = row.insertCell(0);
+    let mac = row.insertCell(1);
+    let type = row.insertCell(2);
+    let rssi = row.insertCell(3);
+    check.innerHTML = '<label><input name="group1" type="checkbox" /><span class="center-align"></span></label>';
+    mac.innerHTML = obj.mac;
+    type.innerHTML = obj.type;
+    rssi.innerHTML = obj.rssi;
   });
+}
+
+function clear() {
+  let length = document.getElementById("scan").rows.length-1;
+  for(let i = 0; i < length; i++)
+    document.getElementById("scan").deleteRow(-1);
+  socket.disconnect();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var elems = document.querySelectorAll('.modal');
+  var instances = M.Modal.init(elems, {
+    onOpenStart: scan,
+    onCloseStart: clear,
+  });
+});
+
 </script>
 
 

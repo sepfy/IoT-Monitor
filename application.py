@@ -3,16 +3,17 @@ from flask import Flask, render_template, session, request, redirect, url_for
 from flask_login import LoginManager
 from flask_socketio import SocketIO, emit
 import json
-from forms import LoginForm
+from forms import LoginForm, ProfileForm
 from bluepy.btle import Scanner, DefaultDelegate
 
 class ScanDelegate(DefaultDelegate):
   def __init__(self):
     DefaultDelegate.__init__(self)
-
+     
   def handleDiscovery(self, dev, isNewDev, isNewData):
     if isNewDev:
-      socketio.emit("update", dev.addr, namespace='/message', room=sid)
+      obj = {"mac": dev.addr, "type": dev.getValueText(9) , "rssi": dev.rssi}
+      socketio.emit("scan", json.dumps(obj), namespace='/scan')
 
 
 #from model import Model
@@ -43,9 +44,10 @@ login_manager.setup_app(app)
 @login_manager.user_loader
 def user_loader(username):
   user = User()
+  user.id = username
   return user
 
-class User(UserMixin):  
+class User(UserMixin): 
   pass 
 
 socketio = SocketIO(app, **params)
@@ -80,7 +82,6 @@ def logout():
 @app.route('/device', methods=['GET', 'POST'])
 @login_required
 def device():
-
     '''
     if request.method == "POST": 
         print(request.values["key"])
@@ -95,24 +96,27 @@ def device():
     '''
     return render_template('device_list.html')
 
-@app.route('/setting')
+@app.route('/setting', methods=['GET', 'POST'])
 @login_required
 def setting():
-    return render_template('setting.html')
+  form = ProfileForm()
+  if form.validate_on_submit():
+    pass
+ 
+  return render_template('setting.html', form=form)
 
-sids = []
 def emit_iot():
   scanner = Scanner().withDelegate(ScanDelegate())
-  devices = scanner.scan(10.0)
-  #while True:
-  #  #msg = model.get_last()
-  #  #print(msg)
-  #  msg = {"temp": 20+round(random.random(),2), "humi": 67}
-  #  #for sid in sids:
-  #  #  socketio.emit("update", {"data": json.dumps(msg), "sid": sid}, namespace='/message', room=sid)
-  #  #time.sleep(3)
+  devices = scanner.scan(1.0)
   
 
+@socketio.on("connect", namespace="/scan")
+def scan_connect():
+  #emit_iot()
+  t = threading.Thread(target = emit_iot)
+  t.start()
+  
+'''
 @socketio.on('connect', namespace='/message')
 def test_connect():
     sids.append(request.sid)
@@ -126,11 +130,8 @@ def test_disconnect():
     sids.remove(request.sid)
     #print('Client disconnected')
     #print(sids)
-
+'''
 
 
 if __name__ == '__main__':
-  t = threading.Thread(target = emit_iot)
-  t.start()
   socketio.run(app, host='0.0.0.0')
-  t.join()

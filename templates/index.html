@@ -146,10 +146,10 @@ socket.on('status', function(msg) {
   console.log(msg.data);
 });
 
-socket.on('update', function(msg) {
-  console.log(msg.data);
-  var obj = JSON.parse(msg.data);
-  Vue.set(vm.series, "values", obj);
+socket.on('scan', function(msg) {
+  console.log(msg);
+  //var obj = JSON.parse(msg.data);
+  //Vue.set(vm.series, "values", obj);
 });
 
 </script>

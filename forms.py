@@ -24,3 +24,7 @@ class LoginForm(FlaskForm):
     self.error = "Error username or password"
     return False
 
+class ProfileForm(FlaskForm):
+  password1 = PasswordField('Password')#, validators=[DataRequired()])
+  password2 = PasswordField('Password again')#, validators=[DataRequired()])
+
