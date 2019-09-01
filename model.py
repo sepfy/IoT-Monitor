@@ -1,69 +1,44 @@
+import plyvel
 import json
-import decimal
-import time
-import boto3
-from boto3.dynamodb.conditions import Key, Attr
-from datetime import datetime
 
-class DecimalEncoder(json.JSONEncoder):
-  def default(self, o):
-    if isinstance(o, decimal.Decimal):
-      if o % 1 > 0:
-        return float(o)
-      else:
-        return int(o)
-    return super(DecimalEncoder, self).default(o)
+class LevelDBModel:
+  def __init__(self, dbname):
+    self.db = plyvel.DB(dbname, create_if_missing=True)
 
-class Model:
+  def put(self, key, value):
+    bytes_of_key = bytes(key, encoding="utf-8")
+    bytes_of_value = bytes(value, encoding="utf-8")
+    self.db.put(bytes_of_key, bytes_of_value)
 
-  def __init__(self):
-    self.dynamodb = boto3.resource('dynamodb', region_name="ap-northeast-1")
-    self.table = self.dynamodb.Table('IoTSensor')
+  def get(self, key):
+    bytes_of_key = bytes(key, encoding="utf-8")
+    bytes_of_value = self.db.get(bytes_of_key)
+    value = str(bytes_of_value, encoding="utf-8")
+    return value
 
-  def get(self):
-    response = self.table.query(
-    KeyConditionExpression=Key('id').eq('r4vwwbav') &\
-                           Key("timestamp").gte(1558874942)\
-    )
-    return response
+  def getall(self):
+    devs = []
+    for bytes_of_key, bytes_of_value in self.db:
+      key = str(bytes_of_key, encoding="utf-8")
+      value = str(bytes_of_value, encoding="utf-8")
+      devs.append({"devid": key, "config": json.loads(value)})
+   
+    return devs
 
-  def get_last(self):
-    response = self.table.query(
-    KeyConditionExpression=Key('id').eq('r4vwwbav')
-    )
-    item = response["Items"][-1]["payload"]
-    j = json.dumps(item, indent=4, cls=DecimalEncoder)
-    return j
+  def delete(self, key):
+    bytes_of_key = bytes(key, encoding="utf-8")
+    self.db.delete(bytes_of_key)
 
-  def get_4hour(self, key):
-    cur_ts = int(time.time())
-    response = self.table.query(
-    KeyConditionExpression=Key('id').eq('r4vwwbav') &\
-                           Key("timestamp").gte(cur_ts - 100*60*48)
-    )
-    items = response["Items"]
-    ts = []
-    data = []
-    j = json.dumps(items, indent=4, cls=DecimalEncoder)
-    objs = json.loads(j)
+  def modify_dict(self, key, dict_key, value):
+    config = self.get_dict(key)
+    config[dict_key] = value
+    self.put_dict(key, config)
 
-    for item in objs:
-        ts.append(datetime.utcfromtimestamp(item["payload"]["timestamp"]).strftime('%H:%M'))
-        data.append(item["payload"][key])
-    return {"ts": ts, "data": data}
+  def put_dict(self, key, value):
+    self.put(key, json.dumps(value))
 
-    
+  def get_dict(self, key):
+    value = self.get(key)
+    return json.loads(value)
 
-if __name__ == "__main__":
-  
-  model = Model()
-  print(model.get_4hour("t"))
-  print(model.get_4hour("h"))
-  #print(j)
-  #response = model.get()
-  #items = response["Items"]
-  #for item in items:
-  #  timestamp = item['payload']['timestamp']
-  #  timearray = time.localtime(timestamp)
-  #  timestr = time.strftime("%Y-%m-%d %H:%M:%S", timearray)
-  #  print(timestr, item['payload']['t'], item['payload']['h'])
+

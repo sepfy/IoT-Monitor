@@ -4,9 +4,10 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
 
+from model import LevelDBModel
 
-db = plyvel.DB('account/', create_if_missing=True)
-db.put(b"admin", b"123456")
+db = LevelDBModel('account/')
+db.put("admin", "123456")
 
 
 class LoginForm(FlaskForm):
@@ -14,10 +15,8 @@ class LoginForm(FlaskForm):
   password = PasswordField('Password')#, validators=[DataRequired()])
 
   def validate(self):
-    bytes_of_username = bytes(self.username.data, encoding = "utf-8")
-    bytes_of_password = db.get(bytes_of_username)
-    if bytes_of_password is not None:
-      password = str(bytes_of_password, encoding = "utf-8")
+    password = db.get(self.username.data)
+    if password is not None:
       if self.password.data == password:
         return True
 
@@ -25,6 +24,19 @@ class LoginForm(FlaskForm):
     return False
 
 class ProfileForm(FlaskForm):
+  username = StringField('Device ID')
   password1 = PasswordField('Password')#, validators=[DataRequired()])
   password2 = PasswordField('Password again')#, validators=[DataRequired()])
+  def validate(self):
+    if self.password1.data == self.password2.data:
+      db.put(self.username.data, self.password1.data)
+      return True
+
+    return False
+
+
+class DeviceForm(FlaskForm):
+  location = StringField('Location')
+  deviceid = StringField('Device ID')
+
 

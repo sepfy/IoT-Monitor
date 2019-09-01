@@ -10,15 +10,31 @@
       <tr>
         <th>ID</th>
         <th>Type</th>
+        <th>Location</th>
         <th>Last Connection</th>
+        <th style="width:50px">Edit</th>
+        <th style="width:50px">Delete</th>
       </tr>
     </thead>
     <tbody>
+      {% for dev in devs %}
       <tr>
-        <td> <a href="/device?id=Central">Central</a></td>
-        <td>Thermometer</td>
+        <td> <a href="/device?id={{dev.devid}}">{{dev.devid}}</a></td>
+        <td>{{dev.config.type}}</td>
+        <td>{{dev.config.location}}</td>
         <td>2019-03-02 14:32:33</td>
+        <td class="center-align">
+          <a href="/device_setting?id={{dev.devid}}">
+            <i class="material-icons">edit</i>
+          </a>
+        </td>
+        <td class="center-align">
+          <a href="/device_deletion?id={{dev.devid}}">
+            <i class="material-icons">delete</i>
+          </a>
+        </td>
       </tr>
+      {% endfor %}
     </tbody>
   </table>
   <br>
@@ -26,31 +42,25 @@
 </div>
 
 <div id="modal1" class="modal">
-  <form action="/device" method="post">
-    <div class="modal-content">
-
-      <table id="scan">
-<h4>
+  <div class="modal-content">
+    <table id="scan">
+      <h4>
         <thead>
           <tr>
-              <th>Selection</th>
-              <th>ID</th>
-              <th>Type</th>
-              <th>Signal</th>
+            <th>Selection</th>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Signal</th>
           </tr>
-
         </thead>
         <tbody>
         </tbody>
-</h4>
-      </table>
-
-    </div>
-    <div class="modal-footer">
-<a class="modal-close waves-effect waves-green btn-flat">CANCEL</a>
-<button type="submit" class="modal-close waves-effect waves-green btn-flat">SUBMIT</button>
-    </div>
-  </form>
+      </h4>
+    </table>
+  </div>
+  <div class="modal-footer">
+    <a class="modal-close waves-effect waves-green btn">SUBMIT</a>
+  </div>
 </div>
 
 
@@ -70,25 +80,33 @@ function scan() {
     let mac = row.insertCell(1);
     let type = row.insertCell(2);
     let rssi = row.insertCell(3);
-    check.innerHTML = '<label><input name="group1" type="checkbox" /><span class="center-align"></span></label>';
+    let value = obj.mac + "|" + obj.type;
+    check.innerHTML = '<label><input class="mac_checked" value="' + value + '" type="checkbox" /><span class="center-align"></span></label>';
     mac.innerHTML = obj.mac;
     type.innerHTML = obj.type;
     rssi.innerHTML = obj.rssi;
   });
 }
 
-function clear() {
-  let length = document.getElementById("scan").rows.length-1;
-  for(let i = 0; i < length; i++)
-    document.getElementById("scan").deleteRow(-1);
+function close() {
+
+  let inputElements = document.getElementsByClassName("mac_checked");
+  for(let i = 0; inputElements[i]; ++i){
+    if(inputElements[i].checked){
+      checkedValue = inputElements[i].value;
+      obj = {"devid": checkedValue.split("|")[0], "type": checkedValue.split("|")[1]};
+      socket.emit("add", obj);
+    }
+  }
   socket.disconnect();
+  location.reload();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
   var elems = document.querySelectorAll('.modal');
   var instances = M.Modal.init(elems, {
     onOpenStart: scan,
-    onCloseStart: clear,
+    onCloseStart: close,
   });
 });
 

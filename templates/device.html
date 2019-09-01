@@ -1,153 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 {% include 'head.html' %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 <body>
 {% include 'nav.html' %}
 
-<div class="container">
+
 <div class="row">
-  <div class="col l6 m12 s12">
-
-<div class="card">
-  <div class="col s4">
-    <div class="card-content"><span class="card-title"> Temperature </span></div>
-  </div>
-  <div class="col s8">
-    <div class="card-tabs right">
-      <ul class="tabs" id="tabs1">
-        <li class="tab"><a class="active" href="#test4"> Recent </a></li>
-        <li class="tab"><a href="#test5"> DAY </a></li>
-        <li class="tab"><a href="#test6"> WEEK </a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="card-content">
-    <canvas id="temp" width=400 height=200></canvas>
-  </div>
-</div>
-
-
-
-<div class="card">
-  <div class="col s12">
-    <div class="card-content"><span class="card-title"> Humidity <a class='dropdown-trigger right flat-btn' href='#' data-target='dropdown1'><i class="material-icons">more_vert</i> </a>
-    </div></span>
-  </div>
-  <div class="col s8">
-
-  <ul id='dropdown1' class='dropdown-content'>
-    <li><a href="#!"> RECENT </a></li>
-    <li><a href="#!"> DAY </a></li>
-    <li><a href="#!"> WEEK </a></li>
-  </ul>
-        
-  </div>
-  <div class="card-content">
-    <canvas id="humi" width=400 height=200></canvas>
-  </div>
-</div>
-
-
-  </div>
-  <div class="col l6 m12 s12">
-  <div class="card">
-  <div class="card-content">
-  <span class="card-title">Device Setting</span>
-   <form>
-      <div class="row">
-        <div class="input-field col s12">
-          <input disabled value="30" id="disabled" type="text" class="validate">
-          <label for="disabled"> Upper Limit </label>
-        </div>
+  <div class="col s12 l6 offset-l3">
+    <form action="/device_setting" method="POST">
+      {{ form.csrf_token }}
+      <input name="deviceid" value="{{request.args.get('id')}}" style="display:none">
+      <div class="input-field col s12">
+        <select name="location">
+          <option value="Living Room">Living Room</option>
+          <option value="Bedroom">Bedroom</option>
+          <option value="Outdoor">Outdoor</option>
+        </select>
       </div>
+      <button class="waves-effect waves-light btn" type="submit">SUBMIT</button>
     </form>
   </div>
-  </div>
-  </div>
-</div>
 </div>
 <script>
 
-var temp = {{temp|tojson}};
-var humi = {{humi|tojson}};
-var temp_ctx = document.getElementById('temp').getContext('2d');
-var humi_ctx = document.getElementById('humi').getContext('2d');
-var temp_chart = new Chart(temp_ctx, {
-  type: 'line',
-  data: {
-    labels: temp["ts"].slice(-20),
-    datasets: [{
-      label: '℃ ',
-      backgroundColor: 'rgba(0, 0, 0, 0)',
-      borderColor: 'rgb(255, 99, 132)',
-      data: temp["data"].slice(-20)
-    }]
-  },
-  options: {
-    legend: {
-        display: false
-    },
-   scales: {
-        xAxes: [{
-            gridLines: {
-                display:false
-            }
-        }],
-        yAxes: [{
-            gridLines: {
-                display:false
-            }   
-        }]
-    }
-  }
-});
-
-var humi_chart = new Chart(humi_ctx, {
-  type: 'line',
-  data: {
-    labels: humi["ts"].slice(-20),
-    datasets: [{
-      label: '%',
-      backgroundColor: 'rgba(0, 0, 0, 0)',
-      borderColor: 'rgb(99, 99, 255)',
-      data: humi["data"].slice(-20)
-    }]
-  },
-  options: {
-    legend: {
-        display: false
-    },
-   scales: {
-        xAxes: [{
-            gridLines: {
-                display:false
-            }
-        }],
-        yAxes: [{
-            gridLines: {
-                display:false
-            }   
-        }]
-    }
-  }
-
-});
-var el1 = document.querySelector('#tabs1');
-var instance1 = M.Tabs.init(el1, {});
-
-//var el2 = document.querySelector('#tabs2');
-//var instance2 = M.Tabs.init(el2, {});
   document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('.dropdown-trigger');
-    var instances = M.Dropdown.init(elems, {});
+    var elems = document.querySelectorAll('select');
+    var instances = M.FormSelect.init(elems, {});
   });
 
 </script>
-
-
-
-
 </body>
-</html>
-
