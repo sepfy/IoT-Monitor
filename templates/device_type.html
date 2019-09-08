@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'head.html' %}
+<body>
+{% include 'nav.html' %}
+
+<div class="container">
+  <form action="/ble_type" method="POST">
+    {{ form.csrf_token }}
+    <label style="font-size:20px"> <b>Type name: </label>
+    <div class="input-field inline">
+      <input type="text" name="name" class="validate">
+    </div>
+    <table  id="type">
+    </table">
+
+
+  </form>
+</div>
+
+
+<script type='text/javascript'>
+
+var table = document.getElementById("type");
+var label, input, cell, charc, service;
+addService(0);
+
+function addService(s) {
+
+  var service = table.insertRow(s);
+
+  cell = service.insertCell(0);
+  label = document.createElement("label");
+  label.innerHTML = "Service 1 UUID";
+  label.style.fontWeight = 'bold';
+  cell.appendChild(label);
+
+  cell = service.insertCell(1);
+  input = document.createElement("input");
+  input.type = "text";
+  label.style.fontWeight = 'bold';
+
+  input.name = "services-" + s + "-uuid";
+  cell.appendChild(input);
+
+  addCharac(table, s, 0);
+
+}
+
+function addCharac(table, s, c) {
+  charac = table.insertRow(c+1);
+
+  cell = charac.insertCell(0);
+  label = document.createElement("label");
+  label.innerHTML = "Charactertic " + (c+1);
+  label.style.fontWeight = 'bold';
+  cell.appendChild(label);
+
+  cell = charac.insertCell(1);
+  label = document.createElement("label");
+  label.innerHTML = "UUID";
+  label.style.fontWeight = 'bold';
+  cell.appendChild(label);
+
+  input = document.createElement("input");
+  input.type = "text";
+  input.name = "services-" + s + "-characs-" + c +"-uuid";
+  cell.appendChild(input);
+
+  label = document.createElement("label");
+  label.innerHTML = "Description";
+  label.style.fontWeight = 'bold';
+  cell.appendChild(label);
+
+  input = document.createElement("input");
+  input.type = "text";
+  input.name = "services-" + s + "-characs-" + c +"-desc";
+  cell.appendChild(input);
+
+
+  var control = table.insertRow(c+2);
+  control.style.border = "0";
+  cell = control.insertCell(0);
+  cell = control.insertCell(1);
+
+  btn = document.createElement("button");
+  btn.innerHTML = '<i class="material-icons">send</i>';
+  btn.type = "submit"
+  btn.className="btn-floating waves-effect waves-light teal accent-4 right";
+  cell.appendChild(btn);
+
+  btn = document.createElement("button");
+  btn.innerHTML = '<i class="material-icons">add</i>';
+  btn.addEventListener('click', function() {
+    table.deleteRow(-1);
+    addCharac(table, s, c+1);
+  }, false);
+  btn.className="btn-floating waves-effect waves-light teal accent-4 right";
+  cell.appendChild(btn);
+
+
+
+
+}
+
+
+    </script>
+
+
+
+</body>
+</html>
+

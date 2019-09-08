@@ -3,7 +3,7 @@ from flask import Flask, render_template, session, request, redirect, url_for
 from flask_login import LoginManager
 from flask_socketio import SocketIO, emit
 import json
-from forms import LoginForm, ProfileForm, DeviceForm
+from forms import LoginForm, ProfileForm, DeviceForm, TypeForm
 from bluepy.btle import Scanner, DefaultDelegate
 
 from model import LevelDBModel
@@ -11,6 +11,9 @@ from model import LevelDBModel
 devdb = LevelDBModel("devinfo")
 devdb.put_dict("Gateway", {"type": "Thermometer", "location": "Living Room"})
 devdb.put_dict("120932ddwa", {"type": "Thermometer", "location":"Outdoor"})
+
+typedb = LevelDBModel("devtype")
+
 
 class ScanDelegate(DefaultDelegate):
   def __init__(self):
@@ -90,8 +93,28 @@ def device_setting():
   if form.validate_on_submit():
     devdb.modify_dict(form.deviceid.data, "location", form.location.data)
     return redirect("/device")
-
   return render_template('device.html', form=form)
+
+@app.route('/ble_type', methods=['GET', 'POST'])
+@login_required
+def device_type():
+  form = TypeForm()
+  if form.validate_on_submit():
+    services = []
+
+    for service in form.services.data:
+      characs = []
+      for charac in service["characs"]:
+        characs.append({"uuid": charac["uuid"], "desc": charac["desc"]})
+      services.append({"uuid": service["uuid"], "characs": characs})
+
+    typedb.put_dict(form.name.data, services)
+
+    return redirect("/setting")
+  return render_template('device_type.html', form=form)
+
+
+
 
 
 @app.route('/device', methods=['GET', 'POST'])

@@ -1,13 +1,14 @@
 import json
 import plyvel
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, FormField, FieldList
 from wtforms.validators import DataRequired
 
 from model import LevelDBModel
 
 db = LevelDBModel('account/')
 db.put("admin", "123456")
+
 
 
 class LoginForm(FlaskForm):
@@ -40,3 +41,18 @@ class DeviceForm(FlaskForm):
   deviceid = StringField('Device ID')
 
 
+
+class CharacForm(FlaskForm):
+  desc = StringField("Description")
+  uuid = StringField("Characteristic UUID")
+  
+class ServiceForm(FlaskForm):
+  uuid = StringField("Service UUID")
+  characs = FieldList(FormField(CharacForm), min_entries=1)
+
+class TypeForm(FlaskForm):
+  name = StringField('Type name')
+  services = FieldList(FormField(ServiceForm), min_entries=1)
+
+  def validate(self):
+    return True
