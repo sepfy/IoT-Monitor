@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'head.html' %}
+<body>
+{% include 'nav.html' %}
+
+<div class="row">
+  <div class="col s12 l3">
+    {% include 'setting/side.html' %}
+  </div>
+  <div class="col s12 l9">
+  <div class="container">
+    {% for gatt in gatts%}
+      <h4>{{gatt.devid}}           
+      <a href="/gatt_deletion?id={{gatt.devid}}">
+        <i class="material-icons">delete</i>
+      </a>
+      </h4>
+      <table>
+        <thead>
+          <tr>
+              <th>Item</th>
+              <th>UUID</th>
+              <th>Description</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for cfg in gatt.config %}
+          <tr>
+            <td> <b>Service {{loop.index}}</b> </td>
+            <td> {{cfg.uuid}} </td>
+            <td>  </td>
+          </tr>
+            {% for charac in cfg.characs %}
+            <tr>
+              <td>Characteristic {{loop.index}}</td>
+              <td>{{charac.uuid}}</td>
+              <td>{{charac.desc}}</td>
+            </tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endfor %}
+    <br>
+    <a href="/setting/gatt/add" class="right btn-floating btn-large waves-effect waves-light teal accent-4"><i class="material-icons">add</i></a>
+  </div>
+  </div>
+
+</div>
+
+
+</body>

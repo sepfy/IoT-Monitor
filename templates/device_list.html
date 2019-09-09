@@ -59,7 +59,7 @@
     </table>
   </div>
   <div class="modal-footer">
-    <a class="modal-close waves-effect waves-green btn">SUBMIT</a>
+    <a class="modal-close waves-effect waves-green btn" onclick="add_devices()">SUBMIT</a>
   </div>
 </div>
 
@@ -89,6 +89,23 @@ function scan() {
 }
 
 function close() {
+  let length = document.getElementById("scan").rows.length-1;
+  for(let i = 0; i < length; i++)
+    document.getElementById("scan").deleteRow(-1);
+  socket.disconnect();
+
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var elems = document.querySelectorAll('.modal');
+  var instances = M.Modal.init(elems, {
+    onOpenStart: scan,
+    onCloseStart: close,
+  });
+});
+
+
+function add_devices() {
 
   let inputElements = document.getElementsByClassName("mac_checked");
   for(let i = 0; inputElements[i]; ++i){
@@ -102,13 +119,6 @@ function close() {
   location.reload();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  var elems = document.querySelectorAll('.modal');
-  var instances = M.Modal.init(elems, {
-    onOpenStart: scan,
-    onCloseStart: close,
-  });
-});
 
 </script>
 

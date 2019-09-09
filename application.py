@@ -95,25 +95,6 @@ def device_setting():
     return redirect("/device")
   return render_template('device.html', form=form)
 
-@app.route('/ble_type', methods=['GET', 'POST'])
-@login_required
-def device_type():
-  form = TypeForm()
-  if form.validate_on_submit():
-    services = []
-
-    for service in form.services.data:
-      characs = []
-      for charac in service["characs"]:
-        characs.append({"uuid": charac["uuid"], "desc": charac["desc"]})
-      services.append({"uuid": service["uuid"], "characs": characs})
-
-    typedb.put_dict(form.name.data, services)
-
-    return redirect("/setting")
-  return render_template('device_type.html', form=form)
-
-
 
 
 
@@ -134,13 +115,54 @@ def device_deletion():
   return redirect("/device")
 
 
-@app.route('/setting', methods=['GET', 'POST'])
+@app.route('/setting')
 @login_required
 def setting():
+  return redirect("/setting/gatt")
+
+@app.route('/setting/gatt', methods=['GET', 'POST'])
+@login_required
+def setting_gatt():
+  gatts = typedb.getall()
+  return render_template('setting/gatt.html', gatts=gatts)
+
+@app.route('/setting/profile', methods=['GET', 'POST'])
+@login_required
+def setting_profile():
   form = ProfileForm()
   if form.validate_on_submit():
     pass
-  return render_template('setting.html', form=form)
+  return render_template('setting/setting.html', form=form)
+
+
+@app.route('/setting/gatt/add', methods=['GET', 'POST'])
+@login_required
+def setting_gatt_add():
+  form = TypeForm()
+  if form.validate_on_submit():
+    services = []
+
+    for service in form.services.data:
+      characs = []
+      for charac in service["characs"]:
+        characs.append({"uuid": charac["uuid"], "desc": charac["desc"]})
+      services.append({"uuid": service["uuid"], "characs": characs})
+
+    typedb.put_dict(form.name.data, services)
+
+    return redirect("/setting")
+  return render_template('setting/gatt_add.html', form=form)
+
+@app.route('/gatt_deletion', methods=['GET', 'POST'])
+@login_required
+def gatt_deletion():
+  gattid = request.args.get('id')
+  typedb.delete(gattid)
+  return redirect("/setting/gatt")
+
+
+
+
 
 def emit_iot():
   scanner = Scanner().withDelegate(ScanDelegate())
