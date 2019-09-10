@@ -1,3 +1,4 @@
+from influxdb import InfluxDBClient
 import plyvel
 import json
 
@@ -15,6 +16,13 @@ class LevelDBModel:
     bytes_of_value = self.db.get(bytes_of_key)
     value = str(bytes_of_value, encoding="utf-8")
     return value
+
+  def get_keys(self):
+    keys = []
+    for bytes_of_key, bytes_of_value in self.db:
+      key = str(bytes_of_key, encoding="utf-8")
+      keys.append(key)
+    return keys
 
   def getall(self):
     devs = []
@@ -42,3 +50,16 @@ class LevelDBModel:
     return json.loads(value)
 
 
+class InfluxDBModel:
+  def __init__(self, db):
+    self.client = InfluxDBClient(host='localhost', port=8086)
+    self.client.create_database(db)
+    self.client.switch_database(db)
+
+  def insert(self, measurement, tags, fields):
+    json_body = [{"measurement": measurement, "tags": tags, "fields": fields}]
+    self.client.write_points(json_body)
+
+#if __name__ == "__main__":
+#  model = Model()
+#  model.insert("sht31", {"deviceId": "6abd"}, {"temp": 31.1, "humi": 65.1})
