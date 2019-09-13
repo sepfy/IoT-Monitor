@@ -2,17 +2,23 @@
 from flask import Flask, render_template, session, request, redirect, url_for
 from flask_login import LoginManager
 from flask_socketio import SocketIO, emit
-import json
 from forms import LoginForm, ProfileForm, DeviceForm, TypeForm
+from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user  
 from bluepy.btle import Scanner, DefaultDelegate
-
 from model import LevelDBModel
+from central import Central
+import threading
+import time
+import datetime
+import random
+import json
 
+gattdb = LevelDBModel("devtype")
 devdb = LevelDBModel("devinfo")
-devdb.put_dict("Gateway", {"type": "Thermometer", "location": "Living Room"})
-devdb.put_dict("120932ddwa", {"type": "Thermometer", "location":"Outdoor"})
 
-typedb = LevelDBModel("devtype")
+central = Central(devdb, gattdb)
+tscan = threading.Thread(target = central.scan)
+tscan.start()
 
 
 class ScanDelegate(DefaultDelegate):
@@ -26,16 +32,8 @@ class ScanDelegate(DefaultDelegate):
 
 
 
-from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user  
 
 
-
-
-import threading
-
-import time
-import datetime
-import random
 
 
 app = Flask(__name__)
@@ -45,6 +43,9 @@ params = {
 	'ping_timeout': 10,
 	'ping_interval': 5
 }
+
+socketio = SocketIO(app, **params)
+
 
 login_manager = LoginManager()
 login_manager.setup_app(app)
@@ -57,7 +58,6 @@ def user_loader(username):
 class User(UserMixin): 
   pass 
 
-socketio = SocketIO(app, **params)
 
 @app.route('/')
 @login_required
@@ -86,15 +86,6 @@ def logout():
   logout_user()  
   return redirect("/login")
 
-@app.route('/device_setting', methods=['GET', 'POST'])
-@login_required
-def device_setting():
-  form = DeviceForm()
-  if form.validate_on_submit():
-    devdb.modify_dict(form.deviceid.data, "location", form.location.data)
-    return redirect("/device")
-  return render_template('device.html', form=form)
-
 
 
 
@@ -104,10 +95,20 @@ def device():
   devs = devdb.getall()
   if request.method == 'POST':
     print(request.form.getlist('mac')) 
-
   return render_template('device_list.html', devs=devs)
 
-@app.route('/device_deletion', methods=['GET', 'POST'])
+
+@app.route('/device/setting', methods=['GET', 'POST'])
+@login_required
+def device_setting():
+  form = DeviceForm()
+  if form.validate_on_submit():
+    devdb.modify_dict(form.deviceid.data, "location", form.location.data)
+    return redirect("/device")
+  return render_template('device.html', form=form)
+
+
+@app.route('/device/deletion', methods=['GET', 'POST'])
 @login_required
 def device_deletion():
   devid = request.args.get('id')
@@ -120,11 +121,6 @@ def device_deletion():
 def setting():
   return redirect("/setting/gatt")
 
-@app.route('/setting/gatt', methods=['GET', 'POST'])
-@login_required
-def setting_gatt():
-  gatts = typedb.getall()
-  return render_template('setting/gatt.html', gatts=gatts)
 
 @app.route('/setting/profile', methods=['GET', 'POST'])
 @login_required
@@ -132,8 +128,14 @@ def setting_profile():
   form = ProfileForm()
   if form.validate_on_submit():
     pass
-  return render_template('setting/setting.html', form=form)
+  return render_template('setting/profile.html', form=form)
 
+
+@app.route('/setting/gatt', methods=['GET', 'POST'])
+@login_required
+def setting_gatt():
+  gatts = gattdb.getall()
+  return render_template('setting/gatt.html', gatts=gatts)
 
 @app.route('/setting/gatt/add', methods=['GET', 'POST'])
 @login_required
@@ -148,17 +150,18 @@ def setting_gatt_add():
         characs.append({"uuid": charac["uuid"], "desc": charac["desc"]})
       services.append({"uuid": service["uuid"], "characs": characs})
 
-    typedb.put_dict(form.name.data, services)
+    gattdb.put_dict(form.name.data, services)
 
     return redirect("/setting")
   return render_template('setting/gatt_add.html', form=form)
 
-@app.route('/gatt_deletion', methods=['GET', 'POST'])
+@app.route('/setting/gatt/deletion', methods=['GET', 'POST'])
 @login_required
-def gatt_deletion():
+def setting_gatt_deletion():
   gattid = request.args.get('id')
-  typedb.delete(gattid)
+  gattdb.delete(gattid)
   return redirect("/setting/gatt")
+
 
 
 
@@ -168,33 +171,24 @@ def emit_iot():
   scanner = Scanner().withDelegate(ScanDelegate())
   devices = scanner.scan(1.0)
 
+
 @socketio.on("add", namespace="/scan")
 def add_devices(msg):
   devdb.put_dict(msg["devid"], {"location": "Bedroom", "type": msg["type"]})
 
-
 @socketio.on("connect", namespace="/scan")
 def scan_connect():
-  #emit_iot()
+  print("conn")
+  central.do_scan = False
+  tscan.join()
   t = threading.Thread(target = emit_iot)
   t.start()
   
-'''
-@socketio.on('connect', namespace='/message')
-def test_connect():
-    sids.append(request.sid)
-    #print(request)
-    #print(session)
-    emit('status', {'data': 'Connected'})
-
-
-@socketio.on('disconnect', namespace='/message')
-def test_disconnect():
-    sids.remove(request.sid)
-    #print('Client disconnected')
-    #print(sids)
-'''
-
+@socketio.on("disconnect", namespace="/scan")
+def scan_disconnect():
+  central.do_scan = True
+  tscan = threading.Thread(target = central.scan)
+  tscan.start()
 
 if __name__ == '__main__':
   socketio.run(app, host='0.0.0.0')

@@ -2,52 +2,64 @@ from bluepy.btle import Scanner, DefaultDelegate, Peripheral
 from model import LevelDBModel, InfluxDBModel
 import time, struct
 
-iotdb = InfluxDBModel("iot")
+class Central:
 
-devdb = LevelDBModel("devinfo")
-gattdb = LevelDBModel("devtype")
+  def __init__(self, devdb, gattdb):
+    self.devdb = devdb
+    self.gattdb = gattdb
+    self.devs = self.devdb.get_keys()
+    self.gatt_keys = self.gattdb.get_keys()
+    self.gatts = self.gattdb.getall()
+    self.connectionTime = {}
+    for dev in self.devs:
+      self.connectionTime[dev] = 0
 
-# Initialize database
-devs = devdb.get_keys()
-gatt_keys = gattdb.get_keys()
-gatts = gattdb.getall()
-# Initialize connection time
-connectionTime = {}
-for dev in devs:
-  connectionTime[dev] = 0
+  # Initialize database
+  iotdb = InfluxDBModel("iot")
+  # Initialize connection time
 
-
-def read(addr):
-  if addr in devs:
-    try:
-      if time.time() - connectionTime[addr] < 60:
-        return 
-
-      index = gatt_keys.index(devdb.get_dict(addr)["type"])
-      services = gatts[index]["config"]
+  # Initialize bluepy
+  scanner = Scanner()
+  conn = Peripheral()
   
-      # Connect to device 
-      conn.connect(addr)
-      series = {}
-      for service in services:
+  do_scan = True
 
-        for charac_cfg in service["characs"]:
-          charac = conn.getCharacteristics(uuid=charac_cfg["uuid"])[0]
-          data = round(struct.unpack('<f', charac.read())[0], 2)
-          series[charac_cfg["desc"]] = data
-      connectionTime[addr] = time.time()
-      print(series)
-      iotdb.insert(gatts[index]["devid"], {"deviceId": addr}, series)
-      conn.disconnect()
+  def read(self, addr):
+    if addr in self.devs:
+      try:
+        if time.time() - self.connectionTime[addr] < 1:
+          return 
 
-    except Exception as e:
-      print(e)
+        index = self.gatt_keys.index(self.devdb.get_dict(addr)["type"])
+        services = self.gatts[index]["config"]
+  
+        # Connect to device 
+        self.conn.connect(addr)
+        series = {}
+        for service in services:
 
-# Initialize bluepy
-scanner = Scanner()
-conn = Peripheral()
+          for charac_cfg in service["characs"]:
+            charac = self.conn.getCharacteristics(uuid=charac_cfg["uuid"])[0]
+            data = round(struct.unpack('<f', charac.read())[0], 2)
+            series[charac_cfg["desc"]] = data
+        self.connectionTime[addr] = time.time()
+        print(series)
+        self.iotdb.insert(self.gatts[index]["devid"], {"deviceId": addr}, series)
+        self.conn.disconnect()
 
-while True:
-  devices = scanner.scan(5)
-  for device in devices:
-    read(device.addr)
+      except Exception as e:
+        print(e)
+
+
+  def scan(self):
+    while self.do_scan is True:
+      try:
+        devices = self.scanner.scan(1)
+        for device in devices:
+          self.read(device.addr)
+      except:
+       pass
+
+if __name__ == "__main__":
+  central = Central()
+  central.scan()

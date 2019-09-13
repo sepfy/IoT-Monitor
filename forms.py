@@ -3,13 +3,9 @@ import plyvel
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FormField, FieldList
 from wtforms.validators import DataRequired
-
 from model import LevelDBModel
 
 db = LevelDBModel('account/')
-db.put("admin", "123456")
-
-
 
 class LoginForm(FlaskForm):
   username = StringField('Username')#, validators=[DataRequired()])
