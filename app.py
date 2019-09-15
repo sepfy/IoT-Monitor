@@ -4,7 +4,6 @@ from flask_login import LoginManager
 from flask_socketio import SocketIO, emit
 from forms import LoginForm, ProfileForm, DeviceForm, TypeForm
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user  
-from bluepy.btle import Scanner, DefaultDelegate
 from model import LevelDBModel
 from central import Central
 import threading
@@ -15,21 +14,6 @@ import json
 
 gattdb = LevelDBModel("devtype")
 devdb = LevelDBModel("devinfo")
-
-central = Central(devdb, gattdb)
-tscan = threading.Thread(target = central.scan)
-tscan.start()
-
-
-class ScanDelegate(DefaultDelegate):
-  def __init__(self):
-    DefaultDelegate.__init__(self)
-     
-  def handleDiscovery(self, dev, isNewDev, isNewData):
-    if isNewDev:
-      obj = {"mac": dev.addr, "type": dev.getValueText(9) , "rssi": dev.rssi}
-      socketio.emit("scan", json.dumps(obj), namespace='/scan')
-
 
 
 
@@ -160,14 +144,14 @@ def setting_gatt_deletion():
   return redirect("/setting/gatt")
 
 
+def scanner_callback(dev):
+  obj = {"mac": dev.addr, "type": dev.getValueText(9) , "rssi": dev.rssi}
+  socketio.emit("scan", json.dumps(obj), namespace='/scan')
 
+central = Central(devdb, gattdb, scanner_callback)
 
-
-
-def emit_iot():
-  scanner = Scanner().withDelegate(ScanDelegate())
-  devices = scanner.scan(1.0)
-
+tlisten = threading.Thread(target = central.listen)
+tlisten.start()
 
 @socketio.on("add", namespace="/scan")
 def add_devices(msg):
@@ -175,17 +159,13 @@ def add_devices(msg):
 
 @socketio.on("connect", namespace="/scan")
 def scan_connect():
-  print("conn")
-  central.do_scan = False
-  tscan.join()
-  t = threading.Thread(target = emit_iot)
-  t.start()
+  tscan = threading.Thread(target = central.scan)
+  tscan.start()
   
 @socketio.on("disconnect", namespace="/scan")
 def scan_disconnect():
-  central.do_scan = True
-  tscan = threading.Thread(target = central.scan)
-  tscan.start()
+  tlisten = threading.Thread(target = central.listen)
+  tlisten.start()
 
 if __name__ == '__main__':
   socketio.run(app, host='0.0.0.0')
