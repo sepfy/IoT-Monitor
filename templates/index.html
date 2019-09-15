@@ -3,158 +3,20 @@
 {% include 'head.html' %}
 <body>
 {% include 'nav.html' %}
-<script>
 
-  document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('.carousel');
-    var instances = M.Carousel.init(elems, {
-      indicators: true
-    });
-  });
-
-</script>
-<div class="containerx">
-  <div class="row">
-
-  <div class="col l6 m12 s12">
-
-<table id="list" class="card centered responsive-table highlight">
-        <thead>
-          <tr>
-              <th> 位置 </th>
-              <th> 更新時間 </th>
-              <th> 溫度 </th>
-              <th> 溼度 </th>
-              <th> 體感溫度 </th>
-              <th> 酷熱指數 </th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr>
-            <td>房間</td>
-            <td>2019/07/03 16:30:43</td>
-            <td>[[series.values.temp]] ℃</td>
-            <td>[[series.values.humi]] %</td>
-            <td>[[series.values.temp]] ℃</td>
-            <td>[[series.values.humi]] ℃</td>
-          </tr>
-          <tr>
-            <td>陽台</td>
-            <td>2019/07/03 16:30:43</td>
-            <td>[[series.values.temp]] ℃</td>
-            <td>[[series.values.humi]] %</td>
-            <td>[[series.values.temp]] ℃</td>
-            <td>[[series.values.humi]] ℃</td>
-          </tr>
-
-
-        </tbody>
-      </table>
-
-  <div class="card">
-<canvas id="myChart"></canvas>
-  </div>
-
-
-    <!--div class="row">
-    <div class="col m6 s12">
-      <div class="card">
-        <div class="card-content">
-          <h6> Temperature </h6>
-          <span class="card-title activator center"> <h3 id="temp" class="red-text text-lighten-3">23.6<small> ℃ </small></h3> </span>
-        </div>
-      </div>
-    </div>
-
-    <div class="col m6 s12">
-      <div class="card">
-        <div class="card-content">
-          <h6> Humidity </h6>
-          <span class="card-title activator center"> <h3 id="humi" class="blue-text text-lighten-3"> 70 <small> % </small> </h3> </span>
-        </div>
-      </div>
-    </div>
-
-    </div-->
-
-  </div>
-  <div class="col s12 l6">
-
-  <div class="carousel carousel-slider center">
-    <div class="carousel-item red white-text card" href="#one!">
-      <h2>體感溫度</h2>
-      <p class="white-text"> 打開電風扇, 體感溫度下降1度</p>
-    </div>
-    <div class="carousel-item amber white-text card" href="#two!">
-      <h2></h2>
-      <p class="white-text"> 夜間2:00至6:00, 戶外溫度較低, 冷氣可以定時至2:00</p>
-    </div>
-    <div class="carousel-item blue white-text card" href="#two!">
-      <h2></h2>
-      <p class="white-text"> 夜間2:00至6:00, 戶外溫度較低, 冷氣可以定時至2:00</p>
-    </div>
-  </div>
-        
-
-
-  </div>
-
-
-  </div>
+<div class="container">
+ <div class="row">
+ <div class="col s6 l4">
+  <ul class="collection with-header">
+    <li class="collection-header"> App </li>
+    <a class="collection-item" id="grafana"><img src="/static/images/grafana-labs.svg" class="responsive-img"></a>
+  </ul>
+ </div>
+ </div>
 </div>
-
-
-
 <script>
-
-
-var vm = new Vue({
-  el: '#list',
-  data: {
-    series: {values: {"temp":0, "humi":0}},
-  },
-  delimiters: ['[[',']]']
-})
-
-
-var ctx = document.getElementById('myChart').getContext('2d');
-var chart = new Chart(ctx, {
-    // The type of chart we want to create
-    type: 'line',
-
-    // The data for our dataset
-    data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-        datasets: [{
-            label: 'My First dataset',
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'rgb(255, 99, 132)',
-            data: [0, 10, 5, 2, 20, 30, 45]
-        }]
-    },
-
-    // Configuration options go here
-    options: {}
-});
-
-
-var url = 'http://' + document.domain + ':' + location.port + '/message';
-console.log(url);
-var socket = io.connect(url);
-socket.on('status', function(msg) {
-  console.log(msg.data);
-});
-
-socket.on('scan', function(msg) {
-  console.log(msg);
-  //var obj = JSON.parse(msg.data);
-  //Vue.set(vm.series, "values", obj);
-});
-
+document.getElementById("grafana").href= "http:" + window.location.href.split(":")[1] + ":3000/";
 </script>
-
-
 
 
 </body>
