@@ -5,18 +5,19 @@
 {% include 'nav.html' %}
 
 <div class="container">
+<br>
 <div class="row">
   <div class="col s12 l3">
-    <h4> </h4>
     {% include 'setting/side.html' %}
   </div>
   <div class="col s12 l9">
+    <div class="container">
     {% for gatt in gatts%}
-      <h4>{{gatt.devid}}           
+      <h5>{{gatt.devid}}           
       <a href="/setting/gatt/deletion?id={{gatt.devid}}">
         <i class="material-icons">delete</i>
       </a>
-      </h4>
+      </h5>
       <table>
         <thead>
           <tr>
@@ -46,6 +47,7 @@
     {% endfor %}
     <br>
     <a href="/setting/gatt/add" class="right btn-floating btn-large waves-effect waves-light teal accent-4"><i class="material-icons">add</i></a>
+  </div>
   </div>
 </div>
 </div>

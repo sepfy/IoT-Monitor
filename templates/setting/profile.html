@@ -5,27 +5,28 @@
 {% include 'nav.html' %}
 
 <div class="container">
+<br>
 <div class="row">
   <div class="col s12 l3">
-    <h4> </h4>
     {% include 'setting/side.html' %}
   </div>
 
   <div class="col s12 l9">
-    <h4>Change Password</h4>
+   <div class="container">
+    <h5>Change Password</h5>
     <form action="/setting" method="POST">
       {{ form.csrf_token }}
       <input name="username" value="{{current_user.id}}" style="display:none">
       <div class="row">
         <div class="input-field col s12">
           <input id="password1" name="password1" type="password" class="validate" onkeyup="check();">
-          <label for="password1"> {{form.password1.label}} </label>
+          <label for="password1"> New password </label>
         </div>
       </div>
       <div class="row">
         <div class="input-field col s12">
           <input id="password2" name="password2" type="password" class="validate" onkeyup="check();">
-          <label for="password2"> {{form.password2.label}} </label>
+          <label for="password2"> Confirm new password </label>
         </div>
       </div>
       <p class="red-text" id="message"></p>
@@ -33,6 +34,7 @@
 
     </form>
   </div>
+ </div>
 </div>
 </div>
 
