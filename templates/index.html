@@ -3,21 +3,79 @@
 {% include 'head.html' %}
 <body>
 {% include 'nav.html' %}
+<br>
+<div class="row">
+ <div class="col s12 m6 l6">
+   <div class="center-align">
+     <p class="grey-text">Apparent Temperature </p>
+     <h1 class="red-text text-lighten-2" style="margin-bottom:-16px;margin-top:-16px; font-size:180px"> 36 </h1>
+     <h5 class="grey-text"><img src="/static/images/temperature.png" width=24>28°C
+     <img src="/static/images/water.png" width=24>70%</h5>
+     <br>
+     <p class="grey-text"> How do you feel? </p> 
+     <div class="row">
+       <div class="col s4 m4 l4">
+       <a onclick="M.toast({html: 'You feel hot. Got it!'})"  href="#"><img width=60 class="responsive-img circle" src="/static/images/fire.png"></a>
+       <p class="grey-text">too hot</p>
+       </div>
+       <div class="col s4 m4 l4">
+       <a onclick="M.toast({html: 'You feel comfortable. Got it!'})" href="#"><img width=60 class="responsive-img circle" src="/static/images/leaf.png"></a>
+       <p class="grey-text">comfortable</p>
+       </div>
+       <div class="col s4 m4 l4">
+       <a onclick="M.toast({html: 'You feel cold. Got it!'})" href="#"><img width=60 class="responsive-img circle" src="/static/images/winter.png"></a>
+       <p class="grey-text">too cold</p>
+       </div>
+     </div>
+    </div>
+  </div>
 
-<div class="container">
- <div class="row">
- <div class="col s6 l4">
-  <ul class="collection with-header">
-    <li class="collection-header"> App </li>
-    <a class="collection-item" id="grafana"><img src="/static/images/grafana-labs.svg" class="responsive-img"></a>
-  </ul>
- </div>
- </div>
+  <div class="col s12 m6 offset-l1 l4">
+   <div class="center-align">
+     <p class="grey-text"> Suggestions </p>
+   </div>         
+  <div class="z-depth-1" style="border-radius:30px">
+    <div style="margin-left:30px" class="row valign-wrapper">
+       <div class="col s8">
+         <h5> too hot</h5>
+         <p> open dehumidifier </p>
+        </div>
+       <div class="col s4">
+         <h4> 34</h4>
+       </div>
+     </div>
+  </div>
+
+  <div class="z-depth-1" style="border-radius:30px">
+    <div style="margin-left:30px" class="row valign-wrapper">
+       <div class="col s8">
+         <h5> too hot</h5>
+         <p> open dehumidifier </p>
+        </div>
+       <div class="col s4">
+         <h4> 34</h4>
+       </div>
+     </div>
+  </div>
+
+  <div class="z-depth-1" style="border-radius:30px">
+    <div style="margin-left:30px" class="row valign-wrapper">
+       <div class="col s8">
+         <h5> too hot</h5>
+         <p> open dehumidifier </p>
+        </div>
+       <div class="col s4">
+         <h4> 34</h4>
+       </div>
+     </div>
+  </div>
+
+
+  </div>
 </div>
-<script>
-document.getElementById("grafana").href= "http:" + window.location.href.split(":")[1] + ":3000/";
-</script>
 
+<script>
+</script>
 
 </body>
 </html>
