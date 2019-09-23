@@ -148,10 +148,25 @@ def scanner_callback(dev):
   obj = {"mac": dev.addr, "type": dev.getValueText(9) , "rssi": dev.rssi}
   socketio.emit("scan", json.dumps(obj), namespace='/scan')
 
-central = Central(devdb, gattdb, scanner_callback)
 
+def collector_callback(msg):
+  socketio.emit("update", {"data": msg}, namespace='/current')
+
+central = Central(devdb, gattdb, scanner_callback, collector_callback)
 tlisten = threading.Thread(target = central.listen)
 tlisten.start()
+tcollect = threading.Thread(target = central.collect)
+tcollect.start()
+
+
+@socketio.on("connect", namespace="/current")
+def scan_connect():
+  pass
+
+@socketio.on("disconnect", namespace="/current")
+def scan_disconnect():
+  pass
+
 
 @socketio.on("add", namespace="/scan")
 def add_devices(msg):
@@ -169,3 +184,4 @@ def scan_disconnect():
 
 if __name__ == '__main__':
   socketio.run(app, host='0.0.0.0')
+  

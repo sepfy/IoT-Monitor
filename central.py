@@ -1,7 +1,7 @@
 from bluepy.btle import Scanner, DefaultDelegate, Peripheral
 from model import LevelDBModel, InfluxDBModel
-import time, struct
-
+import time, struct, json, math
+from grove_sht31 import GroveTemperatureHumiditySensorSHT3x
 
 class ScanDelegate(DefaultDelegate):
   def __init__(self, callback):
@@ -15,13 +15,14 @@ class ScanDelegate(DefaultDelegate):
 
 class Central:
 
-  def __init__(self, devdb, gattdb, scanner_cb):
+  def __init__(self, devdb, gattdb, scanner_cb, collector_cb):
     self.devdb = devdb
     self.gattdb = gattdb
     self.devs = self.devdb.get_keys()
     self.gatt_keys = self.gattdb.get_keys()
     self.gatts = self.gattdb.getall()
     self.connectionTime = {}
+    self.collector_cb = collector_cb
     for dev in self.devs:
       self.connectionTime[dev] = 0
 
@@ -105,6 +106,22 @@ class Central:
     time.sleep(1.0)
     self.scanner.scan(60)
 
+
+  def collect(self):
+    sensor = GroveTemperatureHumiditySensorSHT3x()
+    while True:
+      temp, humi = sensor.read()
+      e = humi/100.0*6.105*math.exp(17.27*temp/(237.7+temp))
+      AT = round(1.07*temp + 0.2*e - 2.7, 2)
+      series = {"Temperature": round(temp, 2), "Humidity": round(humi, 2), "AT": AT}
+      self.iotdb.insert("Thermometer", {"deviceId": "central"}, series)
+      print(series)
+      self.collector_cb(json.dumps(series))
+      time.sleep(5)
+
 if __name__ == "__main__":
-  central = Central()
-  central.listen()
+  gattdb = LevelDBModel("devtype")
+  devdb = LevelDBModel("devinfo")
+  central = Central(devdb, gattdb, None)
+  #central.listen()
+  central.collect()

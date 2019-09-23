@@ -8,10 +8,12 @@
  <div class="col s12 m6 l6">
    <div class="center-align">
      <p class="grey-text">Apparent Temperature </p>
-     <h1 style="margin-bottom:-16px;margin-top:-16px; font-size:180px; font-weight:lighter"> 36 </h1>
-     <h5 >
-       <i style="font-size:28px; vertical-align: middle; padding-bottom: 3px;" class="material-icons">wb_sunny</i> 34℃
-       <i style="font-size:28px; vertical-align: middle; padding-bottom: 3px;" class="material-icons">opacity</i> 70%
+     <h1 id="at" style="margin-bottom:-16px;margin-top:-16px; font-size:180px; font-weight:lighter"> 36 </h1>
+     <h5>
+       <i style="font-size:28px; vertical-align: middle; padding-bottom: 3px;" class="material-icons">wb_sunny</i> 
+       <span id="temp"> 34℃ </span>
+       <i style="font-size:28px; vertical-align: middle; padding-bottom: 3px;" class="material-icons">opacity</i> 
+       <span id="humi"> 70% </span>
      </h5>
      <br>
      <p class="grey-text"> How do you feel? </p> 
@@ -95,6 +97,19 @@
 </div>
 
 <script>
+
+var url = 'http://' + document.domain + ':' + location.port + '/current';
+console.log(url);
+var socket = io.connect(url);
+
+socket.on("update", function(msg) {
+  var obj = JSON.parse(msg.data);
+  document.getElementById("at").innerHTML = Math.round(obj.AT);
+  document.getElementById("temp").innerHTML = Math.round(obj.Temperature)+"°C";
+  document.getElementById("humi").innerHTML = Math.round(obj.Humidity)+"%";
+});
+
+
 </script>
 
 </body>
