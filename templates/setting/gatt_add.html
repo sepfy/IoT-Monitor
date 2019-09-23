@@ -4,7 +4,7 @@
 <body>
 {% include 'nav.html' %}
 
-<div class="container">
+<div class="container" style="color: white">
   <form action="/setting/gatt/add" method="POST">
     {{ form.csrf_token }}
     <label style="font-size:20px"> <b>Type name: </label>
@@ -86,7 +86,7 @@ function addCharac(table, s, c) {
   btn = document.createElement("button");
   btn.innerHTML = '<i class="material-icons">send</i>';
   btn.type = "submit"
-  btn.className="btn-floating waves-effect waves-light teal accent-4 right";
+  btn.className="btn-floating waves-effect waves-light blue-grey darken-4 right";
   cell.appendChild(btn);
 
   btn = document.createElement("button");
@@ -95,7 +95,7 @@ function addCharac(table, s, c) {
     table.deleteRow(-1);
     addCharac(table, s, c+1);
   }, false);
-  btn.className="btn-floating waves-effect waves-light teal accent-4 right";
+  btn.className="btn-floating waves-effect waves-light blue-grey darken-4 right";
   cell.appendChild(btn);
 
 
