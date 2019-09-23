@@ -1,29 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 {% include 'head.html' %}
-<body>
+<body style="background-color:black">
 {% include 'nav.html' %}
 <br>
 <div class="row">
  <div class="col s12 m6 l6">
    <div class="center-align">
      <p class="grey-text">Apparent Temperature </p>
-     <h1 class="red-text text-lighten-2" style="margin-bottom:-16px;margin-top:-16px; font-size:180px"> 36 </h1>
-     <h5 class="grey-text"><img src="/static/images/temperature.png" width=24>28°C
-     <img src="/static/images/water.png" width=24>70%</h5>
+     <h1 class="white-text" style="margin-bottom:-16px;margin-top:-16px; font-size:180px; font-weight:lighter"> 36 </h1>
+     <h5 class="white-text">
+       <i style="font-size:28px; vertical-align: middle; padding-bottom: 3px;" class="material-icons white-text">wb_sunny</i> 34℃
+       <i style="font-size:28px; vertical-align: middle; padding-bottom: 3px;" class="material-icons white-text">opacity</i> 70%
+     </h5>
      <br>
      <p class="grey-text"> How do you feel? </p> 
      <div class="row">
        <div class="col s4 m4 l4">
-       <a onclick="M.toast({html: 'You feel hot. Got it!'})"  href="#"><img width=60 class="responsive-img circle" src="/static/images/fire.png"></a>
+       <a onclick="M.toast({html: 'You feel hot. Got it!'})"  href="#">
+         <i style="font-size:54px" class="material-icons white-text">whatshot</i>
+       </a>
        <p class="grey-text">too hot</p>
        </div>
        <div class="col s4 m4 l4">
-       <a onclick="M.toast({html: 'You feel comfortable. Got it!'})" href="#"><img width=60 class="responsive-img circle" src="/static/images/leaf.png"></a>
+       <a onclick="M.toast({html: 'You feel comfortable. Got it!'})" href="#">
+         <i style="font-size:54px;" class="material-icons white-text">eco</i>
+       </a>
        <p class="grey-text">comfortable</p>
        </div>
        <div class="col s4 m4 l4">
-       <a onclick="M.toast({html: 'You feel cold. Got it!'})" href="#"><img width=60 class="responsive-img circle" src="/static/images/winter.png"></a>
+       <a onclick="M.toast({html: 'You feel cold. Got it!'})" href="#">
+         <i style="font-size:54px" class="material-icons white-text">ac_unit</i>
+       </a>
        <p class="grey-text">too cold</p>
        </div>
      </div>
@@ -34,10 +42,10 @@
    <div class="center-align">
      <p class="grey-text"> Suggestions </p>
    </div>         
-  <div class="z-depth-1" style="border-radius:30px">
+  <div class="z-depth-1 white-text" style="border-radius:30px">
     <div style="margin-left:30px" class="row valign-wrapper">
        <div class="col s8">
-         <h5> too hot</h5>
+         <h5> Now </h5>
          <p> open dehumidifier </p>
         </div>
        <div class="col s4">
@@ -46,10 +54,10 @@
      </div>
   </div>
 
-  <div class="z-depth-1" style="border-radius:30px">
+  <div class="z-depth-5 white-text" style="border-radius:30px">
     <div style="margin-left:30px" class="row valign-wrapper">
        <div class="col s8">
-         <h5> too hot</h5>
+         <h5> 14:00 - 18:00</h5>
          <p> open dehumidifier </p>
         </div>
        <div class="col s4">
@@ -58,10 +66,10 @@
      </div>
   </div>
 
-  <div class="z-depth-1" style="border-radius:30px">
+  <div class="z-depth-1 white-text" style="border-radius:30px">
     <div style="margin-left:30px" class="row valign-wrapper">
        <div class="col s8">
-         <h5> too hot</h5>
+         <h5> 18:00 - 22:00 </h5>
          <p> open dehumidifier </p>
         </div>
        <div class="col s4">
@@ -69,6 +77,18 @@
        </div>
      </div>
   </div>
+  <div class="z-depth-1 white-text" style="border-radius:30px">
+    <div style="margin-left:30px" class="row valign-wrapper">
+       <div class="col s8">
+         <h5> 22:00 - 02:00 </h5>
+         <p> open dehumidifier </p>
+        </div>
+       <div class="col s4">
+         <h4> 34</h4>
+       </div>
+     </div>
+  </div>
+
 
 
   </div>
