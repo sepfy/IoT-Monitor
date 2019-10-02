@@ -5,7 +5,8 @@ from flask_socketio import SocketIO, emit
 from forms import LoginForm, ProfileForm, DeviceForm, TypeForm
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user  
 from model import LevelDBModel
-from central import Central
+#from central import Central
+from sensor import Sensor
 import threading
 import time
 import datetime
@@ -143,21 +144,24 @@ def setting_gatt_deletion():
   gattdb.delete(gattid)
   return redirect("/setting/gatt")
 
-
+'''
 def scanner_callback(dev):
   obj = {"mac": dev.addr, "type": dev.getValueText(9) , "rssi": dev.rssi}
   socketio.emit("scan", json.dumps(obj), namespace='/scan')
-
-
-def collector_callback(msg):
-  socketio.emit("update", {"data": msg}, namespace='/current')
-
 central = Central(devdb, gattdb, scanner_callback, collector_callback)
 tlisten = threading.Thread(target = central.listen)
 tlisten.start()
-tcollect = threading.Thread(target = central.collect)
-tcollect.start()
+'''
 
+def collector_callback(msg):
+  socketio.emit("update", {"data": msg}, namespace='/current')
+sensor = Sensor(devdb, collector_callback)
+
+tacq = threading.Thread(target = sensor.acquire)
+tacq.start()
+
+tdetect = threading.Thread(target = sensor.detect)
+tdetect.start()
 
 @socketio.on("connect", namespace="/current")
 def scan_connect():
@@ -167,6 +171,9 @@ def scan_connect():
 def scan_disconnect():
   pass
 
+@socketio.on("survey", namespace="/current")
+def survey_connect(msg):
+  sensor.survey = msg
 
 @socketio.on("add", namespace="/scan")
 def add_devices(msg):

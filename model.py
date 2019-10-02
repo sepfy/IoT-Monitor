@@ -1,6 +1,6 @@
 from influxdb import InfluxDBClient
 import plyvel
-import json
+import json, time
 
 class LevelDBModel:
   def __init__(self, dbname):
@@ -49,6 +49,7 @@ class LevelDBModel:
     value = self.get(key)
     return json.loads(value)
 
+TIME_UNIT = 1000000000
 
 class InfluxDBModel:
   def __init__(self, db):
@@ -60,6 +61,26 @@ class InfluxDBModel:
     json_body = [{"measurement": measurement, "tags": tags, "fields": fields}]
     self.client.write_points(json_body)
 
-#if __name__ == "__main__":
-#  model = Model()
-#  model.insert("sht31", {"deviceId": "6abd"}, {"temp": 31.1, "humi": 65.1})
+  def query(self, measurement, ts, te):
+    sql = "SELECT * FROM %s WHERE time >= %d AND time <= %d "\
+            %(measurement, ts*TIME_UNIT, te*TIME_UNIT)
+    #print(sql)
+    rs = self.client.query(sql)
+    print(list(rs.get_points(measurement=measurement)))
+
+
+if __name__ == "__main__":
+  model = InfluxDBModel("iot")
+  #model.query("Thermometer", (time.time()-3000), time.time())
+  
+
+  # Sample
+  # Get 24hr ago data
+
+  # 1 Day = 60*60*12
+  dayTimeStamp = 60*60*24
+  ts = time.time() + 60*60*8 - dayTimeStamp
+  te = ts + 4*60*60
+  model.query("Thermometer", ts, te)
+
+  #  model.insert("sht31", {"deviceId": "6abd"}, {"temp": 31.1, "humi": 65.1})
